@@ -30,7 +30,7 @@ func Close() error {
 执行命令
 */
 func Do(commandName string, args ...interface{}) (reply interface{}, err error) {
-	return conn.Do(commandName, args)
+	return conn.Do(commandName, args...)
 }
 
 /*
