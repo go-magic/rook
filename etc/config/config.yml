@@ -1,0 +1,11 @@
+common:
+  mysqlAddr: "root:aU0FEQ^#ad1@tcp(192.168.92.128:3306)/rook_db?charset=utf8mb4&parseTime=True&loc=Local"
+server:
+  midServer:
+    logPath: ./mid.log
+    debug: true
+    port: 10000
+  user:
+    logPath: ./user.log
+    debug: true
+    port: 10000
