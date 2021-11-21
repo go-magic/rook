@@ -7,9 +7,11 @@ curl http://download.redis.io/redis-stable/redis.conf -o redis.conf
 
 mkdir /etc/redis -p
 
-cp redis.conf /etc/redis
+cp redis.conf /etc/redis -f
+
+docker rm -f redis
 
 docker run -p 6379:6379 --name=redis \
       -v /etc/redis/redis.conf:/etc/redis/redis.conf \
       -v /data/redis/data:/data -d redis redis-server \
-      /etc/redis/redis.conf --appendonly yes
+      /etc/redis/redis.conf --appendonly yes --requirepass "123456"
