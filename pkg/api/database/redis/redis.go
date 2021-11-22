@@ -76,8 +76,15 @@ func GetFloat64(key string) (float64, error) {
 }
 
 /*
-获取字符串
+执行命令
 */
-func SetWithTimeout() {
+func Set(commandName string, args ...interface{}) (reply interface{}, err error) {
+	return conn.Do(commandName, args...)
+}
 
+/*
+执行命令
+*/
+func SetWithTimeout(key string,timeout int,args string) (reply interface{}, err error) {
+	return conn.Do("setex",key,timeout, args)
 }
