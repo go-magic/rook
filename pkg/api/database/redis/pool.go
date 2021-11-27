@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"context"
 	"github.com/garyburd/redigo/redis"
 	"time"
 )
@@ -20,4 +21,18 @@ func InitRedisPool(addr string,maxIdle int,MaxActive int,IdleTimeout time.Durati
 
 func GetPool() * redis.Pool{
 	return pool
+}
+
+func GetRedisDb()redis.Conn  {
+	return pool.Get()
+}
+
+func GetRedisDbWithContext(ctx context.Context)(redis.Conn,error)  {
+	return pool.GetContext(ctx)
+}
+
+func AddRedisDB(conn redis.Conn){
+	defer func() {
+		_ = conn.Close()
+	}()
 }
