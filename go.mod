@@ -4,6 +4,7 @@ go 1.15
 
 require (
 	github.com/casbin/casbin/v2 v2.24.0
+	github.com/coreos/etcd v2.3.8+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/garyburd/redigo v1.6.3
 	github.com/gin-gonic/gin v1.7.4
