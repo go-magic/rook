@@ -5,5 +5,13 @@ type Config struct {
 }
 
 type Common struct {
-	MysqlAddr string `yaml:"mysqlAddr"`
+}
+
+type Mysql struct {
+	Addr string `yaml:"addr"`
+}
+
+type Redis struct {
+	Addr   string `yaml:"addr"`
+	Passwd string `yaml:"passwd"`
 }

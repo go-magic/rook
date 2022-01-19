@@ -11,16 +11,31 @@ var conf *Config
 type Config struct {
 	config.Common `yaml:"common"`
 	Server        `yaml:"server"`
+	DB            `yaml:"db"`
 }
 
 type Server struct {
 	MidServer MidServer `yaml:"midServer"`
 }
 
+type DB struct {
+	Mysql `yaml:"mysql"`
+	Redis `yaml:"redis"`
+}
+
 type MidServer struct {
 	LogPath string `yaml:"logPath"`
 	Debug   bool   `yaml:"debug"`
 	Port    string `yaml:"port"`
+}
+
+type Mysql struct {
+	Addr string `yaml:"addr"`
+}
+
+type Redis struct {
+	Addr   string `yaml:"addr"`
+	Passwd string `yaml:"passwd"`
 }
 
 func NewConfig(path string) error {
@@ -49,5 +64,13 @@ func (c Config) GetPort() string {
 }
 
 func (c Config) GetMysqlAddr() string {
-	return c.MysqlAddr
+	return c.Mysql.Addr
+}
+
+func (c Config) GetRedisAddr() string {
+	return c.Redis.Addr
+}
+
+func (c Config) GetRedisPasswd() string {
+	return c.Redis.Passwd
 }

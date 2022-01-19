@@ -36,3 +36,7 @@ func (m Mysql) InitTables(tables ...interface{}) error {
 func (m Mysql) Close() error {
 	return m.db.Close()
 }
+
+func (m Mysql) GetDB() *gorm.DB {
+	return m.db
+}
