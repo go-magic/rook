@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/go-magic/rook/cmd/midServer/config"
+	"github.com/go-magic/rook/config"
 	"github.com/go-magic/rook/pkg/api/database/mysql"
 	"github.com/go-magic/rook/pkg/api/database/mysql/user"
 	"github.com/go-magic/rook/pkg/api/database/redis"
