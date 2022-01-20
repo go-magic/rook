@@ -8,13 +8,15 @@ import (
 
 var pool *redis.Pool //创建redis连接池
 
-func InitRedisPool(addr string, maxIdle int, MaxActive int, IdleTimeout time.Duration) {
+func InitRedisPool(addr string, maxIdle int,
+	MaxActive int, IdleTimeout time.Duration,
+	passwd string) {
 	pool = &redis.Pool{
 		MaxIdle:     maxIdle,
 		MaxActive:   MaxActive,
 		IdleTimeout: IdleTimeout,
 		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", addr)
+			return redis.Dial("tcp", addr, redis.DialPassword(passwd))
 		},
 	}
 }

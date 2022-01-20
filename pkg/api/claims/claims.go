@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-magic/rook/pkg/api/database/redis"
 	"time"
 )
 
-const TokenExpireDuration = time.Second * 24 * 2 // 过期时间 -2天
-var Secret = []byte("secret")                    // 用来加密解密
+var Secret = []byte("secret") // 用来加密解密
 
 type Claims struct {
 	UserID   uint64 `json:"user_id"`
@@ -21,8 +21,8 @@ func CreateToken(userID uint64, username string) (string, error) {
 		userID,
 		username,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(TokenExpireDuration).Unix(), // 过期时间
-			Issuer:    "***",                                      // 签发人
+			ExpiresAt: time.Now().Add(redis.TokenExpireDuration).Unix(), // 过期时间
+			Issuer:    "***",                                            // 签发人
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

@@ -2,7 +2,10 @@ package redis
 
 import (
 	"github.com/garyburd/redigo/redis"
+	"time"
 )
+
+const TokenExpireDuration = time.Second * 24 * 2 // 过期时间 -2天
 
 /*
 执行命令
@@ -21,7 +24,7 @@ func Exist(key string) (bool, error) {
 /*
 获取字符串
 */
-func GetString(key string) (string, error) {
+func GetString(conn redis.Conn, key interface{}) (string, error) {
 	return redis.String(conn.Do("GET", key))
 }
 
