@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/go-magic/rook/pkg/api/database/redis"
+	"github.com/go-magic/rook/pkg/api/handler"
+	"net/http"
 	"time"
 )
 
@@ -18,13 +20,13 @@ const (
 )
 
 type Auth struct {
-	UserId      uint64 `json:"user_id"`
-	LoginType   int    `json:"login_type"`
-	Username    string `json:"username"`
-	Passwd      string `json:"passwd"`
-	PhoneNumber string `json:"phone_number"`
-	Email       string `json:"email"`
-	Address     string `json:"address"`
+	UserId      uint64    `json:"user_id"`
+	LoginType   LoginType `json:"login_type"`
+	Username    string    `json:"username"`
+	Passwd      string    `json:"passwd"`
+	PhoneNumber string    `json:"phone_number"`
+	Email       string    `json:"email"`
+	Address     string    `json:"address"`
 }
 
 type Response struct {
@@ -32,19 +34,13 @@ type Response struct {
 }
 
 func Login(ctx *gin.Context) {
-
-}
-
-func getTokenByRedis(userId uint64) (string, error) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
-	conn, err := redis.GetPool().GetContext(ctx)
-	if err != nil {
-		return "", err
+	auth := &Auth{}
+	if err := ctx.BindJSON(auth); err != nil {
+		ctx.JSON(http.StatusBadRequest, handler.NewResponse("未知错误", Response{}))
+		return
 	}
-	defer func() {
-		_ = conn.Close()
-	}()
-	return redis.GetString(conn, userId)
+	f := GetRegisterInstance().GetRegister(auth.LoginType)
+	f(auth, ctx)
 }
 
 func setTokenToRedis(userId uint64, token string) error {
@@ -56,6 +52,7 @@ func setTokenToRedis(userId uint64, token string) error {
 	defer func() {
 		_ = conn.Close()
 	}()
-	_, err = conn.Do("SETEX", userId, redis.TokenExpireDuration, token)
+	second := int(redis.TokenExpireDuration / time.Second)
+	_, err = conn.Do("setex", userId, second, token)
 	return err
 }

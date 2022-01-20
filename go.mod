@@ -11,5 +11,6 @@ require (
 	github.com/go-admin-team/go-admin-core/sdk v1.3.9
 	github.com/jinzhu/gorm v1.9.16
 	go.uber.org/zap v1.20.0
+	golang.org/x/tools v0.1.5
 	gopkg.in/yaml.v2 v2.4.0
 )

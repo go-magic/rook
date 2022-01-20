@@ -2,6 +2,6 @@ package auth
 
 import "github.com/gin-gonic/gin"
 
-func Phone(ctx *gin.Context) {
+func Phone(auth *Auth, ctx *gin.Context) {
 
 }

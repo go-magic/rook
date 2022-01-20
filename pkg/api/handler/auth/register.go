@@ -1,15 +1,33 @@
 package auth
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"sync"
+)
 
-type Register struct {
-	center map[LoginType]gin.HandlerFunc
+var (
+	registerCenter *register
+	once           sync.Once
+)
+
+type HandlerFunc func(*Auth, *gin.Context)
+
+func GetRegisterInstance() *register {
+	once.Do(func() {
+		registerCenter = &register{}
+		registerCenter.center = make(map[LoginType]HandlerFunc, 3)
+	})
+	return registerCenter
 }
 
-func (r Register) LoginRegister(loginType LoginType, handlerFunc gin.HandlerFunc) {
+type register struct {
+	center map[LoginType]HandlerFunc
+}
+
+func (r register) LoginRegister(loginType LoginType, handlerFunc HandlerFunc) {
 	r.center[loginType] = handlerFunc
 }
 
-func (r Register) GetRegister(loginType LoginType) gin.HandlerFunc {
+func (r register) GetRegister(loginType LoginType) HandlerFunc {
 	return r.center[loginType]
 }

@@ -20,13 +20,14 @@ func initRouter() error {
 }
 
 func login(r *gin.Engine) {
+	auth.GetRegisterInstance().LoginRegister(auth.USER_PASSWD, auth.Account)
+	auth.GetRegisterInstance().LoginRegister(auth.PHONE_NUMBER, auth.Phone)
+	auth.GetRegisterInstance().LoginRegister(auth.EMAIL_PASSWD, auth.Email)
 	r.Handle("POST", "/api/login", auth.Login)
 }
 
 func authorization(r *gin.Engine) {
-	ipam := r.Group("ipam")
-	ipam.Use(middleware.Authorization)
-	ipam.Handle("POST", "/api/logout", auth.Logout)
+	r.Handle("POST", "/api/logout", auth.Logout).Use(middleware.Authorization)
 }
 
 func initConfig() error {
