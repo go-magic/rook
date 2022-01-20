@@ -1,12 +1,9 @@
-package handler
+package auth
 
 import (
 	"context"
 	"github.com/gin-gonic/gin"
-	"github.com/go-magic/rook/pkg/api/claims"
-	"github.com/go-magic/rook/pkg/api/database/mysql/user"
 	"github.com/go-magic/rook/pkg/api/database/redis"
-	"net/http"
 	"time"
 )
 
@@ -30,42 +27,12 @@ type Auth struct {
 	Address     string `json:"address"`
 }
 
-type AuthResponse struct {
+type Response struct {
 	Token string `json:"token"`
 }
 
 func Login(ctx *gin.Context) {
-	auth := &Auth{}
-	if err := ctx.BindJSON(auth); err != nil {
-		ctx.JSON(http.StatusBadRequest, NewResponse("", AuthResponse{}))
-		return
-	}
-	//check user valid
-	sysUser, err := user.GetUserByUsername(auth.Username)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, NewResponse("用户不存在", AuthResponse{}))
-		return
-	}
-	if sysUser.UserName != auth.Username ||
-		sysUser.Passwd != user.Encryption(auth.Passwd) {
-		ctx.JSON(http.StatusOK, NewResponse("账号或密码错误", AuthResponse{}))
-		return
-	}
-	token, err := claims.CreateToken(sysUser.ID,
-		sysUser.UserName, ctx.ClientIP())
-	if err != nil {
-		ctx.JSON(http.StatusOK, NewResponse("login error", AuthResponse{}))
-		return
-	}
-	if token == "" {
-		ctx.JSON(http.StatusOK, NewResponse("login error", AuthResponse{}))
-		return
-	}
-	if err = setTokenToRedis(sysUser.ID, token); err != nil {
-		ctx.JSON(http.StatusOK, NewResponse("login error", AuthResponse{}))
-		return
-	}
-	ctx.JSON(http.StatusOK, NewResponse("login error", AuthResponse{Token: token}))
+
 }
 
 func getTokenByRedis(userId uint64) (string, error) {

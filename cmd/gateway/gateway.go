@@ -7,7 +7,7 @@ import (
 	"github.com/go-magic/rook/pkg/api/database/mysql"
 	"github.com/go-magic/rook/pkg/api/database/mysql/user"
 	"github.com/go-magic/rook/pkg/api/database/redis"
-	"github.com/go-magic/rook/pkg/api/handler"
+	"github.com/go-magic/rook/pkg/api/handler/auth"
 	"github.com/go-magic/rook/pkg/api/middleware"
 	"github.com/go-magic/rook/pkg/api/router"
 )
@@ -20,13 +20,13 @@ func initRouter() error {
 }
 
 func login(r *gin.Engine) {
-	r.Handle("POST", "/api/login", handler.Login)
+	r.Handle("POST", "/api/login", auth.Login)
 }
 
 func authorization(r *gin.Engine) {
 	ipam := r.Group("ipam")
 	ipam.Use(middleware.Authorization)
-	ipam.Handle("POST", "/api/logout", handler.Logout)
+	ipam.Handle("POST", "/api/logout", auth.Logout)
 }
 
 func initConfig() error {
