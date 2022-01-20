@@ -11,11 +11,14 @@ import (
 var MD5Secret = "secret" // 用来加密解密
 
 type User struct {
-	ID       uint64 `gorm:"primary_key"`
-	UserName string
-	PickName string
-	Passwd   string
-	CreateAt time.Time
+	ID          uint64 `gorm:"primary_key"`
+	UserName    string `gorm:"user_name"`
+	PickName    string `gorm:"pick_name"`
+	Passwd      string `gorm:"passwd"`
+	PhoneNumber string `gorm:"phone_number"`
+	Email       string `gorm:"email"`
+	Address     string `gorm:"address"`
+	CreateAt    time.Time
 }
 
 func GetUserByUserId(userId uint64) (*User, error) {

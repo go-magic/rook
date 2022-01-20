@@ -16,7 +16,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-func CreateToken(userID uint64, username string) (string, error) {
+func CreateToken(userID uint64, username string, secret string) (string, error) {
 	var claims = Claims{
 		userID,
 		username,

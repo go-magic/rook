@@ -3,6 +3,7 @@ package config
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"time"
 )
 
 var conf *Config
@@ -25,8 +26,11 @@ type Mysql struct {
 }
 
 type Redis struct {
-	Addr   string `yaml:"addr"`
-	Passwd string `yaml:"passwd"`
+	Addr        string        `yaml:"addr"`
+	Passwd      string        `yaml:"passwd"`
+	MaxIdle     int           `yaml:"maxIdle"`
+	MaxActive   int           `yaml:"maxActive"`
+	IdleTimeout time.Duration `yaml:"idleTimeout"`
 }
 
 func NewConfig(path string) error {
@@ -52,4 +56,16 @@ func (c Config) GetRedisAddr() string {
 
 func (c Config) GetRedisPasswd() string {
 	return c.Redis.Passwd
+}
+
+func (c Config) GetMaxIdle() int {
+	return c.Redis.MaxIdle
+}
+
+func (c Config) GetMaxActive() int {
+	return c.Redis.MaxActive
+}
+
+func (c Config) GetIdleTimeout() time.Duration {
+	return c.Redis.IdleTimeout
 }

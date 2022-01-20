@@ -10,7 +10,7 @@ var pool *redis.Pool //创建redis连接池
 
 func InitRedisPool(addr string, maxIdle int,
 	MaxActive int, IdleTimeout time.Duration,
-	passwd string) {
+	passwd string) error {
 	pool = &redis.Pool{
 		MaxIdle:     maxIdle,
 		MaxActive:   MaxActive,
@@ -19,6 +19,7 @@ func InitRedisPool(addr string, maxIdle int,
 			return redis.Dial("tcp", addr, redis.DialPassword(passwd))
 		},
 	}
+	return nil
 }
 
 func GetPool() *redis.Pool {

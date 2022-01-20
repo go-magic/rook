@@ -43,8 +43,11 @@ func initMysql() error {
 }
 
 func initRedis() error {
-	return redis.InitRedis(
+	return redis.InitRedisPool(
 		config.GetConfig().GetRedisAddr(),
+		config.GetConfig().GetMaxIdle(),
+		config.GetConfig().GetMaxActive(),
+		config.GetConfig().GetIdleTimeout(),
 		config.GetConfig().GetRedisPasswd())
 }
 

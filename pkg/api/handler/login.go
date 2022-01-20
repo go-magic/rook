@@ -12,11 +12,22 @@ import (
 
 var MD5Secret = "secret" // 用来加密解密
 
+type LoginType int
+
+const (
+	USER_PASSWD LoginType = iota
+	PHONE_NUMBER
+	EMAIL_PASSWD
+)
+
 type Auth struct {
 	UserId      uint64 `json:"user_id"`
+	LoginType   int    `json:"login_type"`
 	Username    string `json:"username"`
 	Passwd      string `json:"passwd"`
 	PhoneNumber string `json:"phone_number"`
+	Email       string `json:"email"`
+	Address     string `json:"address"`
 }
 
 type AuthResponse struct {
@@ -30,35 +41,29 @@ func Login(ctx *gin.Context) {
 		return
 	}
 	//check user valid
-	sysUser, err := user.GetUserByUserId(auth.UserId)
+	sysUser, err := user.GetUserByUsername(auth.Username)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, NewResponse("user invalid", AuthResponse{}))
+		ctx.JSON(http.StatusInternalServerError, NewResponse("用户不存在", AuthResponse{}))
 		return
 	}
-	if sysUser.UserName != auth.Username &&
+	if sysUser.UserName != auth.Username ||
 		sysUser.Passwd != user.Encryption(auth.Passwd) {
-		ctx.JSON(http.StatusOK, NewResponse("user not exist", AuthResponse{}))
+		ctx.JSON(http.StatusOK, NewResponse("账号或密码错误", AuthResponse{}))
 		return
 	}
-	token, err := getTokenByRedis(sysUser.ID)
+	token, err := claims.CreateToken(sysUser.ID,
+		sysUser.UserName, ctx.ClientIP())
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, NewResponse("内部服务不可用", AuthResponse{}))
+		ctx.JSON(http.StatusOK, NewResponse("login error", AuthResponse{}))
 		return
 	}
 	if token == "" {
-		token, err = claims.CreateToken(sysUser.ID, sysUser.UserName)
-		if err != nil {
-			ctx.JSON(http.StatusOK, NewResponse("login error", AuthResponse{}))
-			return
-		}
-		if token == "" {
-			ctx.JSON(http.StatusOK, NewResponse("login error", AuthResponse{}))
-			return
-		}
-		if err = setTokenToRedis(sysUser.ID, token); err != nil {
-			ctx.JSON(http.StatusOK, NewResponse("login error", AuthResponse{}))
-			return
-		}
+		ctx.JSON(http.StatusOK, NewResponse("login error", AuthResponse{}))
+		return
+	}
+	if err = setTokenToRedis(sysUser.ID, token); err != nil {
+		ctx.JSON(http.StatusOK, NewResponse("login error", AuthResponse{}))
+		return
 	}
 	ctx.JSON(http.StatusOK, NewResponse("login error", AuthResponse{Token: token}))
 }

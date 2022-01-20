@@ -5,6 +5,9 @@ db:
   redis:
     addr: "192.168.164.128:6379"
     passwd: "123456"
+    maxIdle: 8
+    maxActive: 0
+    idleTimeout: 100
 server:
   midServer:
     logPath: ./mid.log

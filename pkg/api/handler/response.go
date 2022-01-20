@@ -1,13 +1,13 @@
 package handler
 
 type Response struct {
-	Error string
-	Data  interface{}
+	Message string
+	Data    interface{}
 }
 
-func NewResponse(err string, data interface{}) *Response {
+func NewResponse(msg string, data interface{}) *Response {
 	return &Response{
-		Error: err,
-		Data:  data,
+		Message: msg,
+		Data:    data,
 	}
 }
