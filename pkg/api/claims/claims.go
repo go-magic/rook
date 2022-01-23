@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-var Secret = []byte("secret") // 用来加密解密
+var Secret = []byte("as1%^&#!*$%secret&^") // 用来加密解密
 
 type Claims struct {
 	UserID   uint64 `json:"user_id"`
@@ -16,7 +16,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-func CreateToken(userID uint64, username string, secret string) (string, error) {
+func CreateToken(userID uint64, username string, ip string) (string, error) {
 	var claims = Claims{
 		userID,
 		username,
@@ -34,9 +34,10 @@ func CreateToken(userID uint64, username string, secret string) (string, error) 
 }
 
 func ParseToken(tokenStr string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (i interface{}, err error) { // 解析token
-		return Secret, nil
-	})
+	token, err := jwt.ParseWithClaims(tokenStr, &Claims{},
+		func(token *jwt.Token) (i interface{}, err error) { // 解析token
+			return Secret, nil
+		})
 	if err != nil {
 		return nil, err
 	}

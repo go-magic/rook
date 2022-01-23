@@ -1,46 +1,77 @@
 package main
 
 import (
-	"github.com/go-magic/rook/cmd/user/config"
-	"github.com/go-magic/rook/cmd/user/router"
-	"github.com/go-magic/rook/logger"
+	"errors"
+	"github.com/gin-gonic/gin"
+	"github.com/go-magic/rook/config"
 	"github.com/go-magic/rook/pkg/api/database/mysql"
 	"github.com/go-magic/rook/pkg/api/database/mysql/user"
-	"go.uber.org/zap"
+	"github.com/go-magic/rook/pkg/api/database/redis"
+	"github.com/go-magic/rook/pkg/api/handler/auth"
+	"github.com/go-magic/rook/pkg/api/middleware"
+	"github.com/go-magic/rook/pkg/api/router"
 )
 
 const configPath = "./etc/config/config.yml"
 
-func initConfig(path string) error {
-	return config.NewConfig(path)
+func initRouter() error {
+	r := router.NewRouter()
+	login(r)
+	authorization(r)
+	return r.Run()
 }
 
-func initLog(path string, debug bool) {
-	logger.InitLogger(path, debug)
+func login(r *gin.Engine) {
+	auth.GetRegisterInstance().LoginRegister(auth.USER_PASSWD, auth.Account)
+	auth.GetRegisterInstance().LoginRegister(auth.PHONE_NUMBER, auth.Phone)
+	auth.GetRegisterInstance().LoginRegister(auth.EMAIL_PASSWD, auth.Email)
+	r.Handle("POST", "/api/login", auth.Login)
 }
 
-func initServer() {
-	if err := initConfig(configPath); err != nil {
-		panic(err)
-	}
-	initLog(config.GetConfig().GetLogPath(), config.GetConfig().GetDebug())
-	if err := initMysql(config.GetConfig().GetMysqlAddr()); err != nil {
-		panic(err)
-	}
+func authorization(r *gin.Engine) {
+	r.Handle("POST", "/api/logout", auth.Logout).Use(middleware.Authorization)
 }
 
-func initMysql(mysqlAddr string) error {
-	if err := mysql.InitMysql(mysqlAddr); err != nil {
+func initConfig() error {
+	return config.NewConfig(configPath)
+}
+
+func initMysql() error {
+	if err := mysql.InitMysql(config.GetConfig().GetMysqlAddr()); err != nil {
 		return err
 	}
-	return mysql.GetMysqlInstance().InitTables(user.User{})
+	return mysql.GetMysqlInstance().InitTables(
+		user.User{},
+	)
 }
 
-func startServer() {
-	initServer()
-	logger.Fatal("gin退出", zap.Any("error", router.NewRouter().Run(":"+config.GetConfig().GetPort())))
+func initRedis() error {
+	return redis.InitRedisPool(
+		config.GetConfig().GetRedisAddr(),
+		config.GetConfig().GetMaxIdle(),
+		config.GetConfig().GetMaxActive(),
+		config.GetConfig().GetIdleTimeout(),
+		config.GetConfig().GetRedisPasswd())
+}
+
+func startServer() error {
+	if err := initConfig(); err != nil {
+		return err
+	}
+	if err := initMysql(); err != nil {
+		return err
+	}
+	if err := initRedis(); err != nil {
+		return err
+	}
+	if err := initRouter(); err != nil {
+		return err
+	}
+	return errors.New("程序退出")
 }
 
 func main() {
-	startServer()
+	if err := startServer(); err != nil {
+		panic(err)
+	}
 }
