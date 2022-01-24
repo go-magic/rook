@@ -55,3 +55,7 @@ func (c *v3Client) Put(ctx context.Context, key, value string) (*clientv3.PutRes
 func (c *v3Client) Get(ctx context.Context, key string) (*clientv3.GetResponse, error) {
 	return c.client.Get(ctx, key)
 }
+
+func (c *v3Client) MemberList(ctx context.Context) (*clientv3.MemberListResponse, error) {
+	return c.client.MemberList(ctx)
+}

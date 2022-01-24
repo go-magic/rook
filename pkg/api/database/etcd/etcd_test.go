@@ -10,7 +10,7 @@ import (
 
 func etcdDemo() {
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   []string{"192.168.92.129:2379"},
+		Endpoints:   []string{"192.168.164.128:2379"},
 		DialTimeout: 5 * time.Second,
 	})
 	if err != nil {
@@ -48,7 +48,7 @@ func etcdDemo() {
 }
 
 func TestName(t *testing.T) {
-	DefaultConfig.Endpoints = []string{"192.168.92.129:2379"}
+	DefaultConfig.Endpoints = []string{"192.168.164.128:2379"}
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
 	watch := GetClientOnce().Watch(ctx, "asd")
 	for v := range watch {
