@@ -1,61 +1,93 @@
 package etcd
 
 import (
-	"github.com/coreos/etcd/Godeps/_workspace/src/golang.org/x/net/context"
-	"github.com/coreos/etcd/clientv3"
+	"context"
+	"errors"
+	"fmt"
+	"go.etcd.io/etcd/client/v3"
 	"sync"
 	"time"
 )
 
-var (
-	once          sync.Once
-	client        *v3Client
-	DefaultConfig = &Config{Endpoints: []string{"127.0.0.1:2379"}, DialTimeout: time.Second * 5}
-)
-
-type Config struct {
-	Endpoints   []string
-	DialTimeout time.Duration
+type Service struct {
+	closeChan chan struct{}    //关闭通道
+	client    *clientv3.Client //etcd v3 client
+	leaseID   clientv3.LeaseID //etcd 租约id
+	wg        sync.WaitGroup
+	key       string
+	value     string
 }
 
-type v3Client struct {
-	client *clientv3.Client
-}
-
-func GetClientOnce() *v3Client {
-	once.Do(func() {
-		var err error
-		client.client, err = newClient(DefaultConfig)
-		if err != nil {
-			panic(err)
-		}
-	})
-	return client
-}
-
-func newClient(config *Config) (*clientv3.Client, error) {
+// NewService 构造一个注册服务
+func NewService(etcdEndpoints []string, timeout time.Duration, key, value string) (*Service, error) {
 	cli, err := clientv3.New(clientv3.Config{
-		Endpoints:   config.Endpoints,
-		DialTimeout: config.DialTimeout,
+		Endpoints:   etcdEndpoints,
+		DialTimeout: timeout,
 	})
-	if err != nil {
+	if nil != err {
 		return nil, err
 	}
-	return cli, nil
+	s := &Service{
+		client:    cli,
+		closeChan: make(chan struct{}),
+		key:       key,
+		value:     value,
+	}
+	return s, nil
 }
 
-func (c *v3Client) Close() error {
-	return c.client.Close()
+// Start 开启注册
+// @param - ttlSecond 租期(秒)
+func (s *Service) Start(ttlSecond int64) error {
+	// minimum lease TTL is 5-second
+	resp, err := s.client.Grant(context.TODO(), ttlSecond)
+	if err != nil {
+		return err
+	}
+	s.leaseID = resp.ID
+	_, err = s.client.Put(context.TODO(), s.key, s.value, clientv3.WithLease(s.leaseID))
+	if err != nil {
+		return err
+	}
+	ch, err1 := s.client.KeepAlive(context.TODO(), s.leaseID)
+	if nil != err1 {
+		return err
+	}
+	fmt.Printf("[discovery] Service Start leaseID:[%d] key:[%s], value:[%s]", s.leaseID, s.key, s.value)
+	s.wg.Add(1)
+	defer s.wg.Done()
+	for {
+		select {
+		case <-s.closeChan:
+			return s.revoke()
+		case <-s.client.Ctx().Done():
+			return errors.New("server closed")
+		case ka, ok := <-ch:
+			if !ok {
+				fmt.Printf("[discovery] Service Start keep alive channel closed")
+				return s.revoke()
+			} else {
+				fmt.Printf("[discovery] Service Start recv reply from Service: %s, ttl:%d", s.key, ka.TTL)
+				fmt.Printf("aaa:%s", ka.String())
+			}
+		}
+	}
+	return nil
 }
 
-func (c *v3Client) Put(ctx context.Context, key, value string) (*clientv3.PutResponse, error) {
-	return c.client.Put(ctx, key, value)
+// Stop 停止
+func (s *Service) Stop() {
+	close(s.closeChan)
+	s.wg.Wait()
+	s.client.Close()
 }
 
-func (c *v3Client) Get(ctx context.Context, key string) (*clientv3.GetResponse, error) {
-	return c.client.Get(ctx, key)
-}
-
-func (c *v3Client) MemberList(ctx context.Context) (*clientv3.MemberListResponse, error) {
-	return c.client.MemberList(ctx)
+func (s *Service) revoke() error {
+	_, err := s.client.Revoke(context.TODO(), s.leaseID)
+	if err != nil {
+		fmt.Printf("[discovery] Service revoke key:[%s] error:[%s]", s.key, err.Error())
+	} else {
+		fmt.Printf("[discovery] Service revoke successfully key:[%s]", s.key)
+	}
+	return err
 }

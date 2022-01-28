@@ -26,7 +26,6 @@ func Close() error {
 	return conn.Close()
 }
 
-
 type Reply interface {
-	RedisSuccess()bool
+	RedisSuccess() bool
 }

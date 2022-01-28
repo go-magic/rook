@@ -6,7 +6,7 @@ import (
 )
 
 func TestLog(t *testing.T) {
-	InitLogger("./logger.logger",false)
+	InitLogger("./logger.logger", false)
 	Warn("请求错误",
 		zap.String("url", "http://www.baidu.com"),
 		zap.String("error", "请求失败"))
