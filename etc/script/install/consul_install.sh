@@ -18,3 +18,8 @@ docker run -d -p 8500:8500 -p 8300:8300 -p 8301:8301 -p 8302:8302 -p 8600:8600 \
 	-node='192.168.164.134' -bind='0.0.0.0' -advertise='192.168.164.134' \
 	 -join=192.168.164.132
 
+#单机版
+docker run -d -p 8500:8500 -p 8300:8300 -p 8301:8301 -p 8302:8302 -p 8600:8600 \
+	--restart=always --name=consul consul:latest agent \
+	-server -bootstrap -ui -node=node1 -client='0.0.0.0'
+
