@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#参数说明
+#-client 0.0.0.0表示其他机器服务可以访问，127.0.0.1表示只能本机服务可访问
+#-bind 0.0.0.0表示其他机器服务可以访问，127.0.0.1表示只能本机服务可访问
+#-node集群中的ip地址
+#-advertise对外暴露的ip地址
 # 安装consul集群
 docker run -d -p 8500:8500 -p 8300:8300 -p 8301:8301 -p 8302:8302 -p 8600:8600 \
 	--restart=always --name=consul_server1 consul:latest agent \
