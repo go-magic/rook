@@ -5,5 +5,6 @@ import (
 )
 
 func TestName(t *testing.T) {
-
+	s := Service{}
+	t.Log(s)
 }
