@@ -6,4 +6,4 @@ rm -rf $pgdata
 
 mkdir -p $pgdata
 
-docker run --name postgres -e POSTGRES_USER="lx" -e POSTGRES_DB="lx" -e POSTGRES_PASSWORD="lx" -p 5432:5432 -v $pgdata:/var/lib/postgresql/data -d postgres
+docker run --restart=always --name postgres -e POSTGRES_USER="lx" -e POSTGRES_DB="lx" -e POSTGRES_PASSWORD="lx" -p 5432:5432 -v $pgdata:/var/lib/postgresql/data -d postgres
