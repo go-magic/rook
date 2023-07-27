@@ -13,6 +13,7 @@ require (
 	github.com/lib/pq v1.3.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.5 // indirect
 	go.etcd.io/etcd/client/v3 v3.5.1
+	go.mongodb.org/mongo-driver v1.12.0
 	go.uber.org/zap v1.20.0
 	gopkg.in/yaml.v2 v2.4.0
 )
